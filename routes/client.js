@@ -22,7 +22,7 @@ function getDetailPath(path, this_folder){
         rest = rest.substr(1,rest.length-1);
         this_folder = "";
         urls.push({
-            "name": "root",
+            "name": "۞",
             "url":  ""
         });
         if(rest != ""){
