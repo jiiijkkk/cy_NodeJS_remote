@@ -235,7 +235,7 @@ exports.view = function(req, res){
         +   "</a>"
         +   "<br />";
     var fs = require('fs');
-    fs.readFile('/home/v/project/ruby/ri20min.rb', function (err, data) {
+    fs.readFile(path, function (err, data) {
         if (err)
             throw err;
         str +=  data
