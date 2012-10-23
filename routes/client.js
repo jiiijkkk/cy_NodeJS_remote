@@ -3,6 +3,7 @@ var sys=    require('sys')
   
 var prepath_explorer=   "/explorer";
 var prepath_view=       "/view";
+var prepath_download=   "/download";
 
 var Regex = {
     "FileName": "((\\d|\\w|-|_|\\.|:)+(\\d|\\w|-|_|\\.| |:)*)*(\\d|\\w|-|_|\\.|:)"
@@ -217,7 +218,13 @@ exports.view = function(req, res){
         if(typeof detail_path[i].url !== "undefined")
             str += "</a>";
     }
-    str += "<br />";
+    str += "<br />"
+        +   "<a href = '"
+        +   prepath_download + path
+        +   "'/>"
+        +   "Download"
+        +   "</a>"
+        +   "<br />";
     var fs = require('fs');
     fs.readFile('/home/v/project/ruby/ri20min.rb', function (err, data) {
         if (err)
@@ -229,4 +236,14 @@ exports.view = function(req, res){
             +   "</html>";
         res.end(str);
     });
+}
+
+exports.download = function(req, res){
+    var path = req.url.substring(prepath_download.length);
+    console.log(path);
+    var fs = require('fs');
+    var fileData = fs.readFileSync(path);
+    res.writeHead(200);
+    res.write(fileData);
+    res.end();
 }
