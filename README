@@ -1,0 +1,4 @@
+This is a server explorer app like appache but ruling them all!
+
+Please run as followed command :
+    sudo node app.js

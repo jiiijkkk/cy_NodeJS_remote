@@ -3,6 +3,10 @@ html
   head
     title= path
   body
+    - for ( var i in path_detail)
+        a(href= path_detail[i].url)
+            |#{ path_detail[i].name }
+    br
     |Total #{ total }
     br
     table
@@ -24,7 +28,7 @@ html
             TH
                 |TIME
             TH
-                |PATH
+                |URL
         - for ( var i in items)
             tr
                 td= items[i].mod
@@ -40,7 +44,13 @@ html
                         a(href= items[i].url)
                             |#{ i }
                     - else if (items[i].info.type == 'l')
-                        div(style= "color: #FF0000;")
-                            |#{ i }
+                        -if(typeof items[i].info.ln !== "undefined")
+                            |#{ items[i].info.ln.name } -> 
+                            - for ( var j in items[i].info.ln.target)
+                                a(href= items[i].info.ln.target[j].url)
+                                    |#{ items[i].info.ln.target[j].name }
+                        -else
+                            div(style= "color: #FF0000;")
+                                |#{ i }
                     - else
                         |#{ i }
