@@ -1,0 +1,46 @@
+doctype 5
+html
+  head
+    title= path
+  body
+    |Total #{ total }
+    br
+    table
+        tr
+            th
+                |MOD
+            th
+                |TMP
+            TH
+                |USER
+            TH
+                |GROUP
+            TH
+                |SIZE
+            TH
+                |MONTH
+            TH
+                |DATE
+            TH
+                |TIME
+            TH
+                |PATH
+        - for ( var i in items)
+            tr
+                td= items[i].mod
+                td= items[i].tmp
+                td= items[i].user
+                td= items[i].group
+                td= items[i].size
+                td= items[i].month
+                td= items[i].date
+                td= items[i].time
+                td
+                    - if (items[i].info.type == 'd')
+                        a(href= items[i].url)
+                            |#{ i }
+                    - else if (items[i].info.type == 'l')
+                        div(style= "color: #FF0000;")
+                            |#{ i }
+                    - else
+                        |#{ i }
