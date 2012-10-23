@@ -49,7 +49,7 @@ html
                             |#{ i }
                     - else if (items[i].info.type == 'l')
                         -if(typeof items[i].info.ln !== "undefined")
-                            a(href= prepath_view + items[i].info.ln.target)
+                            a(href= prepath_explorer + items[i].info.ln.target)
                                 |#{ items[i].info.ln.name }
                             | 
                             |-> 
@@ -71,7 +71,3 @@ html
                     - if (items[i].info.type == '-')
                         a(href= prepath_download + items[i].info.file.url)
                             |Download
-                    - else if (items[i].info.type == 'l')
-                        if(typeof items[i].info.ln !== "undefined")
-                            a(href= prepath_download + items[i].info.ln.target)
-                                |Download
