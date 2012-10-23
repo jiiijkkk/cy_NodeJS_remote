@@ -4,6 +4,7 @@ var sys=    require('sys')
 var prepath_explorer=   "/explorer";
 var prepath_view=       "/view";
 var prepath_download=   "/download";
+var prepath_upload=   "/upload";
 
 var Regex = {
     "FileName": "((\\d|\\w|-|_|\\.|:)+(\\d|\\w|-|_|\\.| |:)*)*(\\d|\\w|-|_|\\.|:)"
@@ -102,6 +103,7 @@ function getInfo(mod, name, path){
 
 exports.explorer = function(req, res){
     var path = req.url.substring(prepath_explorer.length);
+    
     if(path.substr(path.length -1) == "/")
         path = path.substr(0, path.length-1);
     var child=  exec("pwd /" + path, function (pwd_error, pwd_stdout, pwd_stderr) {
@@ -172,6 +174,9 @@ exports.explorer = function(req, res){
                 rest = rest.substr(matches[0].length);
                 var name = matches[0];
                 
+                //  SYMBOL
+                name = name.replace("\\", "");
+                
                 rest = rest.substr(1);  //  DELETE '\n'
                 
                 info = getInfo(mod, name, path);
@@ -195,6 +200,7 @@ exports.explorer = function(req, res){
                 "prepath_explorer":   prepath_explorer,
                 "prepath_view":       prepath_view,
                 "prepath_download":   prepath_download,
+                "prepath_upload":     prepath_upload,
             
                 //  THIS PAGE
                 "total":        total,
@@ -248,8 +254,16 @@ exports.view = function(req, res){
 }
 
 exports.download = function(req, res){
-    var path = req.url.substring(prepath_download.length);
     var fs = require('fs');
+    var path = req.url.substring(prepath_download.length);
     var fileStream = fs.createReadStream(path);
     fileStream.pipe(res);
+}
+
+exports.upload = function(req, res){
+    var fs = require('fs');    
+    var path = req.url.substring(prepath_upload.length);
+    var child=  exec("mv \"" + req.files.file.path + "\" \"" + path + "/" + req.files.file.name + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
+        res.redirect(prepath_explorer + path);
+    });
 }
