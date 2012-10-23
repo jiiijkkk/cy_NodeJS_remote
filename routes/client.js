@@ -23,7 +23,7 @@ function getDetailPath(path, this_folder){
         this_folder = "";
         urls.push({
             "name": "root",
-            "url":  prepath_explorer
+            "url":  ""
         });
         if(rest != ""){
             urls.push({
@@ -51,7 +51,7 @@ function getDetailPath(path, this_folder){
                 this_folder += "/" + str;
             urls.push({
                 "name": str,
-                "url":  prepath_explorer + this_folder
+                "url":  this_folder
             });
         }
     }
@@ -88,12 +88,12 @@ function getInfo(mod, name, path){
         else url = path + "/" + name;
         if(info.type == "d"){
             info['dir'] = {
-                "url":  prepath_explorer + url
+                "url":  url
             };
         }
         else if (info.type == "-"){
             info['file'] = {
-                "url":  prepath_view + url
+                "url":  url
             };
         }
     }
@@ -190,10 +190,19 @@ exports.explorer = function(req, res){
             }
             
             res.render('client', {
+            
+                //  PREPATH
+                "prepath_explorer":   prepath_explorer,
+                "prepath_view":       prepath_view,
+                "prepath_download":   prepath_download,
+            
+                //  THIS PAGE
                 "total":        total,
                 "path":         path,
                 "path_detail":  path_detail,
-                "items":        items,
+                
+                //  ITEMS
+                "items":        items
             });
         });
     });
@@ -213,7 +222,7 @@ exports.view = function(req, res){
         +   "<code>";
     for( var i in detail_path){
         if(typeof detail_path[i].url !== "undefined")
-            str += "<a href = '" + detail_path[i].url + "'>";
+            str += "<a href = '" + prepath_explorer + detail_path[i].url + "'>";
         str += detail_path[i].name;
         if(typeof detail_path[i].url !== "undefined")
             str += "</a>";
