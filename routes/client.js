@@ -240,10 +240,7 @@ exports.view = function(req, res){
 
 exports.download = function(req, res){
     var path = req.url.substring(prepath_download.length);
-    console.log(path);
     var fs = require('fs');
-    var fileData = fs.readFileSync(path);
-    res.writeHead(200);
-    res.write(fileData);
-    res.end();
+    var fileStream = fs.createReadStream(path);
+    fileStream.pipe(res);
 }
