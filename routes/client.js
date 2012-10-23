@@ -1,7 +1,9 @@
 var sys=    require('sys')
   , exec=   require('child_process').exec;
   
-var pre_path = "/client";
+var prepath_explorer=   "/explorer";
+var prepath_view=       "/view";
+
 var Regex = {
     "FileName": "((\\d|\\w|-|_|\\.|:)+(\\d|\\w|-|_|\\.| |:)*)*(\\d|\\w|-|_|\\.|:)"
 }
@@ -20,7 +22,7 @@ function getDetailPath(path, this_folder){
         this_folder = "";
         urls.push({
             "name": "root",
-            "url":  pre_path
+            "url":  prepath_explorer
         });
         if(rest != ""){
             urls.push({
@@ -48,7 +50,7 @@ function getDetailPath(path, this_folder){
                 this_folder += "/" + str;
             urls.push({
                 "name": str,
-                "url":  pre_path + this_folder
+                "url":  prepath_explorer + this_folder
             });
         }
     }
@@ -63,17 +65,42 @@ function getInfo(mod, name, path){
         if(matches = name.match('^' + Regex.FileName + ' -> ')){
             var rest = name.substr(matches[0].length);
             var ln = matches[0].substr(0, matches[0].length - " -> ".length);
+            var detail_path = getDetailPath(rest, path);
             info['ln'] = {
                 "name":     ln,
-                "target":   getDetailPath(rest, path)
+                "path":     detail_path,
+                "target":   detail_path[detail_path.length-1].url
+            };
+        }
+    } else if (info.type == "d" || info.type == "-"){
+        var url;
+        if(name == '.')url = path;
+        else if(name == '..'){
+            if(matches = path.match('[^/]+$')){
+                url = path.substr(0, path.length - matches[0].length -1 );
+            }
+            else url = path
+        }
+        else if(info.type == "-" && name.substr(0, 2) == "//"){
+            url = name.substr(1, name.length-1);
+        }
+        else url = path + "/" + name;
+        if(info.type == "d"){
+            info['dir'] = {
+                "url":  prepath_explorer + url
+            };
+        }
+        else if (info.type == "-"){
+            info['file'] = {
+                "url":  prepath_view + url
             };
         }
     }
     return info;
 }
 
-exports.test = function(req, res){
-    var path = req.url.substring(pre_path.length);
+exports.explorer = function(req, res){
+    var path = req.url.substring(prepath_explorer.length);
     if(path.substr(path.length -1) == "/")
         path = path.substr(0, path.length-1);
     var child=  exec("pwd /" + path, function (pwd_error, pwd_stdout, pwd_stderr) {
@@ -144,17 +171,7 @@ exports.test = function(req, res){
                 rest = rest.substr(matches[0].length);
                 var name = matches[0];
                 
-                rest = rest.substr(1);
-                
-                var url;
-                if(name == '.')url = path;
-                else if(name == '..'){
-                    if(matches = path.match('[^/]+$')){
-                        url = path.substr(0, path.length - matches[0].length -1 );
-                    }
-                    else url = path
-                }
-                else url = path + "/" + name;
+                rest = rest.substr(1);  //  DELETE '\n'
                 
                 info = getInfo(mod, name, path);
                 
@@ -167,7 +184,6 @@ exports.test = function(req, res){
                     "month":month,
                     "date": date,
                     "time": time,
-                    "url":  pre_path + url,
                     "info": info
                 };
             }
@@ -179,5 +195,38 @@ exports.test = function(req, res){
                 "items":        items,
             });
         });
+    });
+}
+
+exports.view = function(req, res){
+    var path = req.url.substring(prepath_view.length);
+    var detail_path = getDetailPath(path);
+    var str = "<html>";
+    str +=  "<head>"
+        +   "<title>"
+        +   path
+        +   "</title>"
+        +   "</head>"
+        +   "<body>"
+        +   "<pre>"
+        +   "<code>";
+    for( var i in detail_path){
+        if(typeof detail_path[i].url !== "undefined")
+            str += "<a href = '" + detail_path[i].url + "'>";
+        str += detail_path[i].name;
+        if(typeof detail_path[i].url !== "undefined")
+            str += "</a>";
+    }
+    str += "<br />";
+    var fs = require('fs');
+    fs.readFile('/home/v/project/ruby/ri20min.rb', function (err, data) {
+        if (err)
+            throw err;
+        str +=  data
+            +   "</code>"
+            +   "</pre>"
+            +   "</body>"
+            +   "</html>";
+        res.end(str);
     });
 }

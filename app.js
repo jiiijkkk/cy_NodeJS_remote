@@ -32,8 +32,9 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
-app.get('/client', client.test);
-app.get(/^\/client\/.+/, client.test);
+app.get('/explorer', client.explorer);
+app.get(/^\/explorer\/.+/, client.explorer);
+app.get(/^\/view\/.+/, client.view);
 app.get('/users', user.list);
 
 http.createServer(app).listen(app.get('port'), function(){

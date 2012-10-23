@@ -41,16 +41,20 @@ html
                 td= items[i].time
                 td
                     - if (items[i].info.type == 'd')
-                        a(href= items[i].url)
+                        a(href= items[i].info.dir.url)
                             |#{ i }
                     - else if (items[i].info.type == 'l')
                         -if(typeof items[i].info.ln !== "undefined")
-                            |#{ items[i].info.ln.name } -> 
-                            - for ( var j in items[i].info.ln.target)
-                                a(href= items[i].info.ln.target[j].url)
-                                    |#{ items[i].info.ln.target[j].name }
+                            a(href= items[i].info.ln.target)
+                                |#{ items[i].info.ln.name }
+                            | 
+                            |-> 
+                            - for ( var j in items[i].info.ln.path)
+                                a(href= items[i].info.ln.path[j].url)
+                                    |#{ items[i].info.ln.path[j].name }
                         -else
                             div(style= "color: #FF0000;")
                                 |#{ i }
                     - else
-                        |#{ i }
+                        a(href= items[i].info.file.url)
+                            |#{ i }
