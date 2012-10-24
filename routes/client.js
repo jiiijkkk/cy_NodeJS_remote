@@ -107,7 +107,6 @@ function getInfo(mod, name, path){
 exports.explorer = function(req, res){
     var path = req.url.substring(prepath_explorer.length);
     path = decodeURI(path);
-    console.log(path);
     
     if(path.substr(path.length -1) == "/")
         path = path.substr(0, path.length-1);
