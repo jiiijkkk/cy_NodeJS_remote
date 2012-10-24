@@ -40,6 +40,7 @@ html
             th
                 |URL
             th
+            th
         - for ( var i in items)
             tr
                 td= items[i].mod
@@ -78,3 +79,7 @@ html
                     - if (items[i].info.type == '-')
                         a(href= PrePath.Download + items[i].info.file.url)
                             |Download
+                td
+                    - if (items[i].info.type == '-')
+                        a(href= PrePath.Remove + items[i].info.file.url)
+                            |Remove

@@ -36,6 +36,7 @@ app.get(/^\/explorer(\/.*)?$/, client.explorer);
 app.get(/^\/view(\/.*)?$/, client.view);
 app.get(/^\/download(\/.*)?$/, client.download);
 app.post(/^\/upload(\/.*)?$/, client.upload);
+app.get(/^\/remove(\/.*)?$/, client.remove);
 app.get('/users', user.list);
 
 http.createServer(app).listen(app.get('port'), function(){

@@ -6,7 +6,8 @@ var PrePath = {
     "Explorer": "/explorer",
     "View":     "/view",
     "Download": "/download",
-    "Upload":   "/upload"
+    "Upload":   "/upload",
+    "Remove":   "/remove"
 }
 
 var Regex = {
@@ -327,4 +328,22 @@ exports.upload = function(req, res){
             res.redirect(PrePath.Explorer + path);
         });
     }
+}
+
+//  MOVE TO /TMP
+exports.remove = function(req, res){
+    var path = req.url.substring(PrePath.Remove.length);
+    var child=  exec("mv \"" + path + "\" /tmp", function (pwd_error, pwd_stdout, pwd_stderr) {
+        if(pwd_error){
+            req.session[SessionCFG.name.error] = {
+                "name":     pwd_error.name,
+                "message":  pwd_error.message,
+                "object":   pwd_error
+            };
+        }
+        if(matches = path.match('[^\/]+$')){
+            path = path.substr(0, path.length - matches[0].length - '/'.length);
+        }
+        res.redirect(PrePath.Explorer + path);
+    });
 }
