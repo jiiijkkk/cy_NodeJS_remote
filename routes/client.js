@@ -263,6 +263,12 @@ exports.view = function(req, res){
         +   "'/>"
         +   "Download"
         +   "</a>"
+        +   " "
+        +   "<a href = '"
+        +   PrePath.Remove + path
+        +   "'/>"
+        +   "Remove"
+        +   "</a>"
         +   "<br />";
     var fs = require('fs');
     fs.readFile(path, function (err, data) {
