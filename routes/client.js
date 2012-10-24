@@ -1,6 +1,7 @@
 var sys=    require('sys')
   , exec=   require('child_process').exec;
-  
+
+//  CONFIG
 var prepath_explorer=   "/explorer";
 var prepath_view=       "/view";
 var prepath_download=   "/download";
@@ -8,6 +9,13 @@ var prepath_upload=     "/upload";
 
 var Regex = {
     "FileName": "((\\d|\\w|-|_|\\.|:)+(\\d|\\w|-|_|\\.| |:)*)*(\\d|\\w|-|_|\\.|:)"
+}
+
+//  CONFIG
+var SessionCFG = {
+    "name":{
+        "error":    "NODEJS_REMOTE_EXPLORER_ERROR"
+    }
 }
 
 function deletePreSpace(str){
@@ -105,6 +113,12 @@ function getInfo(mod, name, path){
 }
 
 exports.explorer = function(req, res){
+    var error;
+    if(typeof req.session[SessionCFG.name.error] !== "undefined"){
+        error = req.session[SessionCFG.name.error];
+        delete req.session[SessionCFG.name.error];
+    }
+
     var path = req.url.substring(prepath_explorer.length);
     path = decodeURI(path);
     
@@ -212,7 +226,10 @@ exports.explorer = function(req, res){
                 "path_detail":  path_detail,
                 
                 //  ITEMS
-                "items":        items
+                "items":        items,
+                
+                //  ERROR
+                "error":        error
             });
         });
     });
@@ -249,14 +266,22 @@ exports.view = function(req, res){
         +   "<br />";
     var fs = require('fs');
     fs.readFile(path, function (err, data) {
-        if (err)
-            throw err;
-        str +=  data
-            +   "</code>"
-            +   "</pre>"
-            +   "</body>"
-            +   "</html>";
-        res.end(str);
+        if (err){
+                req.session[SessionCFG.name.error] = {
+                    "name":     err.name,
+                    "message":  err.message,
+                    "object":   err
+                };
+                res.redirect(prepath_explorer + path);
+        }
+        else {
+            str +=  data
+                +   "</code>"
+                +   "</pre>"
+                +   "</body>"
+                +   "</html>";
+            res.end(str);
+        }
     });
 }
 
@@ -265,7 +290,17 @@ exports.download = function(req, res){
     var path = req.url.substring(prepath_download.length);
     path = decodeURI(path);
     var fileStream = fs.createReadStream(path);
-    fileStream.pipe(res);
+    fileStream.on('open', function (){
+        fileStream.pipe(res);
+    });
+    fileStream.on('error', function(err){
+        req.session[SessionCFG.name.error] = {
+            "name":     err.name,
+            "message":  err.message,
+            "object":   err
+        };
+        res.redirect(prepath_explorer + path);
+    });
 }
 
 exports.upload = function(req, res){
@@ -273,6 +308,15 @@ exports.upload = function(req, res){
     var path = req.url.substring(prepath_upload.length);
     path = decodeURI(path);
     var child=  exec("mv \"" + req.files.file.path + "\" \"" + path + "/" + req.files.file.name + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
+        if(pwd_error){
+            req.session[SessionCFG.name.error] = {
+                "name":     pwd_error.name,
+                "message":  pwd_error.message,
+                "object":   pwd_error
+            };
+            var child=  exec("rm \"" + req.files.file.path + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
+            });
+        }
         res.redirect(prepath_explorer + path);
     });
 }

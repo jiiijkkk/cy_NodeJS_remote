@@ -14,6 +14,8 @@ html
         input(type= "file", name= "file")
         br
         input(type= "Submit", value= "Upload")
+    - if (typeof error !== "undefined")
+        |#{ error.name } : #{ error.message }
     br
     |Total #{ total }
     br
