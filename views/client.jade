@@ -7,10 +7,10 @@ html
         -if (typeof path_detail[i].url === "undefined")
             |#{ path_detail[i].name }
         -else
-            a(href= prepath_explorer + path_detail[i].url)
+            a(href= PrePath.Explorer + path_detail[i].url)
                 |#{ path_detail[i].name }
     br
-    form(method="POST", enctype="multipart/form-data", action= prepath_upload +  path)
+    form(method="POST", enctype="multipart/form-data", action= PrePath.Upload +  path)
         input(type= "file", name= "file")
         br
         input(type= "Submit", value= "Upload")
@@ -52,11 +52,11 @@ html
                 td= items[i].time
                 td
                     - if (items[i].info.type == 'd')
-                        a(href= prepath_explorer + items[i].info.dir.url)
+                        a(href= PrePath.Explorer + items[i].info.dir.url)
                             |#{ i }
                     - else if (items[i].info.type == 'l')
                         -if(typeof items[i].info.ln !== "undefined")
-                            a(href= prepath_explorer + items[i].info.ln.target)
+                            a(href= PrePath.Explorer + items[i].info.ln.target)
                                 |#{ items[i].info.ln.name }
                             | 
                             |-> 
@@ -64,17 +64,17 @@ html
                                 - if(typeof items[i].info.ln.path[j].url === "undefined")
                                     |#{ items[i].info.ln.path[j].name }
                                 - else
-                                    a(href= prepath_explorer + items[i].info.ln.path[j].url)
+                                    a(href= PrePath.Explorer + items[i].info.ln.path[j].url)
                                         |#{ items[i].info.ln.path[j].name }
                         -else
                             div(style= "color: #FF0000;")
                                 |#{ i }
                     - else if (items[i].info.type == '-')
-                        a(href= prepath_view + items[i].info.file.url)
+                        a(href= PrePath.View + items[i].info.file.url)
                             |#{ i }
                     - else
                         |#{ i }
                 td
                     - if (items[i].info.type == '-')
-                        a(href= prepath_download + items[i].info.file.url)
+                        a(href= PrePath.Download + items[i].info.file.url)
                             |Download

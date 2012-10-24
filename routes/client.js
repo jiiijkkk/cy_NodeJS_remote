@@ -2,10 +2,12 @@ var sys=    require('sys')
   , exec=   require('child_process').exec;
 
 //  CONFIG
-var prepath_explorer=   "/explorer";
-var prepath_view=       "/view";
-var prepath_download=   "/download";
-var prepath_upload=     "/upload";
+var PrePath = {
+    "Explorer": "/explorer",
+    "View":     "/view",
+    "Download": "/download",
+    "Upload":   "/upload"
+}
 
 var Regex = {
     "FileName": "((\\d|\\w|-|_|\\.|:)+(\\d|\\w|-|_|\\.| |:)*)*(\\d|\\w|-|_|\\.|:)"
@@ -119,7 +121,7 @@ exports.explorer = function(req, res){
         delete req.session[SessionCFG.name.error];
     }
 
-    var path = req.url.substring(prepath_explorer.length);
+    var path = req.url.substring(PrePath.Explorer.length);
     path = decodeURI(path);
     
     if(path.substr(path.length -1) == "/")
@@ -215,10 +217,7 @@ exports.explorer = function(req, res){
             res.render('client', {
             
                 //  PREPATH
-                "prepath_explorer":   prepath_explorer,
-                "prepath_view":       prepath_view,
-                "prepath_download":   prepath_download,
-                "prepath_upload":     prepath_upload,
+                "PrePath":   PrePath,
             
                 //  THIS PAGE
                 "total":        total,
@@ -236,7 +235,7 @@ exports.explorer = function(req, res){
 }
 
 exports.view = function(req, res){
-    var path = req.url.substring(prepath_view.length);
+    var path = req.url.substring(PrePath.View.length);
     path = decodeURI(path);
     var detail_path = getDetailPath(path);
     var str = "<html>";
@@ -251,7 +250,7 @@ exports.view = function(req, res){
     for( var i in detail_path){
         if(typeof detail_path[i].url !== "undefined"){
             url = detail_path[i].url.replace('%', '%25');
-            str += "<a href = '" + prepath_explorer + url + "'>";
+            str += "<a href = '" + PrePath.Explorer + url + "'>";
         }
         str += decodeURI(detail_path[i].name.replace('%', '%25'));
         if(typeof detail_path[i].url !== "undefined")
@@ -259,7 +258,7 @@ exports.view = function(req, res){
     }
     str += "<br />"
         +   "<a href = '"
-        +   prepath_download + path
+        +   PrePath.Download + path
         +   "'/>"
         +   "Download"
         +   "</a>"
@@ -272,7 +271,7 @@ exports.view = function(req, res){
                     "message":  err.message,
                     "object":   err
                 };
-                res.redirect(prepath_explorer + path);
+                res.redirect(PrePath.Explorer + path);
         }
         else {
             str +=  data
@@ -286,8 +285,8 @@ exports.view = function(req, res){
 }
 
 exports.download = function(req, res){
+    var path = req.url.substring(PrePath.Download.length);
     var fs = require('fs');
-    var path = req.url.substring(prepath_download.length);
     path = decodeURI(path);
     var fileStream = fs.createReadStream(path);
     fileStream.on('open', function (){
@@ -299,24 +298,33 @@ exports.download = function(req, res){
             "message":  err.message,
             "object":   err
         };
-        res.redirect(prepath_explorer + path);
+        res.redirect(PrePath.Explorer + path);
     });
 }
 
 exports.upload = function(req, res){
-    var fs = require('fs');
-    var path = req.url.substring(prepath_upload.length);
-    path = decodeURI(path);
-    var child=  exec("mv \"" + req.files.file.path + "\" \"" + path + "/" + req.files.file.name + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
-        if(pwd_error){
-            req.session[SessionCFG.name.error] = {
-                "name":     pwd_error.name,
-                "message":  pwd_error.message,
-                "object":   pwd_error
-            };
-            var child=  exec("rm \"" + req.files.file.path + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
-            });
-        }
-        res.redirect(prepath_explorer + path);
-    });
+    var path = req.url.substring(PrePath.Upload.length);
+    if(req.files.file.size == 0){
+        req.session[SessionCFG.name.error] = {
+            "name":     "Warning",
+            "message":  "No file chosen",
+            "object":   {}
+        };
+        res.redirect(PrePath.Explorer + path);
+    } else {
+        var fs = require('fs');
+        path = decodeURI(path);
+        var child=  exec("mv \"" + req.files.file.path + "\" \"" + path + "/" + req.files.file.name + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
+            if(pwd_error){
+                req.session[SessionCFG.name.error] = {
+                    "name":     pwd_error.name,
+                    "message":  pwd_error.message,
+                    "object":   pwd_error
+                };
+                var child=  exec("rm \"" + req.files.file.path + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
+                });
+            }
+            res.redirect(PrePath.Explorer + path);
+        });
+    }
 }
