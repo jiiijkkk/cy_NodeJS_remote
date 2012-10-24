@@ -23,8 +23,6 @@ app.configure(function(){
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
-  app.set('key', fs.readFileSync('privatekey.pem').toString());
-  app.set('cert', fs.readFileSync('certificate.pem').toString());
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
@@ -52,6 +50,16 @@ https.createServer(options, app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
-http.createServer(app).listen(app.get('port') + 1, function(){
-  console.log("Express server listening on port " + (app.get('port') + 1));
+var app2 = express();
+var app2_port = 3001;
+app2.configure(function(){
+    app2.use(function(req, res){
+        var path = req.headers.host;
+        var ip = path.substr(0, path.length - app2_port.toString().length - ':'.length);
+        var url = "";
+        if(req.url.substr(0, 1) == "/")
+            url = req.url;
+        res.redirect("https://" + ip + ":" + app.get('port') + url);
+    });
 });
+http.createServer(app2).listen(app2_port);
