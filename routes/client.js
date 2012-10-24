@@ -4,7 +4,7 @@ var sys=    require('sys')
 var prepath_explorer=   "/explorer";
 var prepath_view=       "/view";
 var prepath_download=   "/download";
-var prepath_upload=   "/upload";
+var prepath_upload=     "/upload";
 
 var Regex = {
     "FileName": "((\\d|\\w|-|_|\\.|:)+(\\d|\\w|-|_|\\.| |:)*)*(\\d|\\w|-|_|\\.|:)"
@@ -86,7 +86,10 @@ function getInfo(mod, name, path){
         else if(info.type == "-" && name.substr(0, 2) == "//"){
             url = name.substr(1, name.length-1);
         }
-        else url = path + "/" + name;
+        else{
+            url = path + "/" + name;
+            url = url.replace('%','%25');
+        }
         if(info.type == "d"){
             info['dir'] = {
                 "url":  url
@@ -103,11 +106,13 @@ function getInfo(mod, name, path){
 
 exports.explorer = function(req, res){
     var path = req.url.substring(prepath_explorer.length);
+    path = decodeURI(path);
+    console.log(path);
     
     if(path.substr(path.length -1) == "/")
         path = path.substr(0, path.length-1);
-    var child=  exec("pwd /" + path, function (pwd_error, pwd_stdout, pwd_stderr) {
-        var child=  exec("dir /" + path + " -al", function (ll_error, ll_stdout, ll_stderr) {
+    var child=  exec("pwd \"/" + path + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
+        var child=  exec("dir \"/" + path + "\" -al", function (ll_error, ll_stdout, ll_stderr) {
             rest = ll_stdout;
             
             //  PATH
@@ -216,6 +221,7 @@ exports.explorer = function(req, res){
 
 exports.view = function(req, res){
     var path = req.url.substring(prepath_view.length);
+    path = decodeURI(path);
     var detail_path = getDetailPath(path);
     var str = "<html>";
     str +=  "<head>"
@@ -227,9 +233,11 @@ exports.view = function(req, res){
         +   "<pre>"
         +   "<code>";
     for( var i in detail_path){
-        if(typeof detail_path[i].url !== "undefined")
-            str += "<a href = '" + prepath_explorer + detail_path[i].url + "'>";
-        str += detail_path[i].name;
+        if(typeof detail_path[i].url !== "undefined"){
+            url = detail_path[i].url.replace('%', '%25');
+            str += "<a href = '" + prepath_explorer + url + "'>";
+        }
+        str += decodeURI(detail_path[i].name.replace('%', '%25'));
         if(typeof detail_path[i].url !== "undefined")
             str += "</a>";
     }
@@ -256,13 +264,15 @@ exports.view = function(req, res){
 exports.download = function(req, res){
     var fs = require('fs');
     var path = req.url.substring(prepath_download.length);
+    path = decodeURI(path);
     var fileStream = fs.createReadStream(path);
     fileStream.pipe(res);
 }
 
 exports.upload = function(req, res){
-    var fs = require('fs');    
+    var fs = require('fs');
     var path = req.url.substring(prepath_upload.length);
+    path = decodeURI(path);
     var child=  exec("mv \"" + req.files.file.path + "\" \"" + path + "/" + req.files.file.name + "\"", function (pwd_error, pwd_stdout, pwd_stderr) {
         res.redirect(prepath_explorer + path);
     });
